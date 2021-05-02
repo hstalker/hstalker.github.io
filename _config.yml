@@ -1,0 +1,36 @@
+title: "Sigbus Factor"
+description: "Sigbuses can kill projects almost as fast as real buses can"
+author: "Hector Stalker"
+email: "1683065+hstalker@users.noreply.github.com"
+
+plugins:
+  - jekyll-feed
+
+theme: minima
+
+# Social links
+github_username: hstalker
+linkedin_username: hstalker
+rss: RSS
+
+# Show post excepts on the front page
+show_excerpts: true
+
+minima:
+  date_format: "%Y-%m-%d"
+
+header_pages:
+  - _pages/index.md
+  - _pages/about.md
+  - _pages/archive.md
+
+include:
+  - _pages
+
+exclude:
+  - .gitignore
+  - docker-compose.yml
+  - Gemfile
+  - Gemfile.lock
+  - LICENSE
+  - README.md
