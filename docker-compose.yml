@@ -1,8 +1,17 @@
-jekyll:
-  image: jekyll/jekyll:3.8
-  command: jekyll serve --livereload --drafts
-  ports:
-    - 4000:4000
-    - 35729:35729
-  volumes:
-    - .:/srv/jekyll
+version: '3'
+
+services:
+  jekyll:
+    image: docker.io/jekyll/jekyll:3.8
+    environment:
+      - JEKYLL_ENV=development
+      # The Jekyll image seems to require us to manually set the UID/GID
+      # for non-root containers
+      - JEKYLL_UID=1001
+      - JEKYLL_GID=1001
+    command: jekyll serve --livereload --drafts --force_polling --incremental
+    ports:
+      - 4000:4000
+      - 35729:35729
+    volumes:
+      - .:/srv/jekyll
