@@ -15,6 +15,7 @@ still work.
 
 To spin up the test server, in the repository's root directory, run:
 ```shell
+# Pull necessary images, build & bring up the container
 docker-compose up
 ```
 The server should now be exposed on port 4000 for local browsing. You may need
@@ -22,10 +23,16 @@ super-user privileges for this depending on what flavor of Docker you are using.
 
 Run the following to stop and remove the web server container:
 ```shell
+# Stop the container only
+docker-compose stop jekyll
+
+# OR
+
+# Stop the container and remove it in one step
 docker-compose down
 ```
 
-## Updating Ruby Packages
+## Updating Ruby Gems
 
 ```shell
 # Substitute $CONTAINER_NAME as appropriate
