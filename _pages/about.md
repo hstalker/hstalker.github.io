@@ -14,8 +14,15 @@ projects about as much buses. One of the projects I worked on quite early into
 my career was plagued by SIGBUSes, and the difficulty of debugging these issues
 left a lasting impression on me.
 
-I try to keep this blog minimal — One would hope this would encourage a person
-to write more often, but such is life!
+I try to keep this blog minimal in theme.
+
+I post a few categories of articles, including but not limited to:
+ * _Obvious Observations_, where I discuss the perhaps unexpected implications
+   of something that is likely already obvious to most people.
+ * _Meanderings_, which is basically what I would class as a fairly lazy brain
+   dump. These tend not to be too well proof-read or edited (intentionally so).
+ * Other miscellaneous posts which I would term "normal effort-posts". These
+   should be considered more typical & expected blog content.
 
 
 # __About Me__
