@@ -70,10 +70,10 @@ Similarly, _replacement_ is only effective if the sum cost of deco + buiding a
 replacement is cheaper than building something which can be effectively mangled
 and then subsequently mangling it into a cthulhu-esque monstrosity.
 
-It's worth mentioning that any software which lives long enough, _replacement_
-will inevitably become an approach that is applied to any piece of code. Few
-things are truly extensible enough to outlive an eventual replacement. The
-take-away here is probably that within the long-march of the software
+It's worth mentioning that, for any software which lives long enough,
+_replacement_ will inevitably become an approach that is applied to any piece of
+code. Few things are truly extensible enough to outlive an eventual replacement.
+The take-away here is probably that within the long-march of the software
 development process _replacement_ is defacto last resort, and is of course more
 flexible; this much is obvious since one is replacing a component in its
 entirety.
