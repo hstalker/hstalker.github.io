@@ -8,6 +8,9 @@ plugins:
 
 theme: minima
 
+# Prefer kramdown over GFM for footnotes.
+markdown: kramdown
+
 # Social links
 github_username: hstalker
 linkedin_username: hstalker
