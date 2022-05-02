@@ -36,7 +36,7 @@ docker-compose down
 
 ```shell
 # Substitute $CONTAINER_NAME as appropriate
-docker-compose exec $CONTAINER_NAME bash -c 'bundle update && bundle lock'
+docker exec $CONTAINER_NAME bash -c 'bundle update && bundle lock'
 ```
 
 
