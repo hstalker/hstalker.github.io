@@ -8,8 +8,6 @@ Beware: Opinions lie o'er yonder
 
 ---
 
-# Using `std::thread::detach()` is Probably a Mistake
-
 C++ [std::thread](https://en.cppreference.com/w/cpp/thread/thread) objects are a
 handy abstraction over OS threads. They are an extremely convenient
 cross-platform tool, but once you are in the domain of concurrency, you are also
