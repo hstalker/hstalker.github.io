@@ -430,6 +430,9 @@ With this advanced, more fundamental API we are able to do this with ease:
 // app_bar.c
 #inlude <foo_lib.h>
 
+/* Note that this is definitely not the cleanest way to write this code, but
+ * does serve to illustrate the point */
+
 int main(int, char*[])
 {
 #define N 20
@@ -439,20 +442,20 @@ int main(int, char*[])
     /* Construct all our foos */
     for (int i = 0; i < N; ++i)
     {
-        libfoo_construct_foo(f_memory);
+        libfoo_construct_foo(&foos[i * foo_size]);
     }
     while (true)
     {
         /* Use all our foos in efficient memory access order in hot loop */
         for (int i = 0; i < N; ++i)
         {
-            libfoo_do_baz(foos[i * foo_size]);
+            libfoo_do_baz(&foos[i * foo_size]);
         }
     }
     /* Cleanup all our foos */
     for (int i = 0; i < N; ++i)
     {
-        libfoo_destroy_foo(fs[i * foo_size]);
+        libfoo_destroy_foo(&foos[i * foo_size]);
     }
     free(foos);
 }
@@ -618,4 +621,4 @@ Until next time!
 
 [^3]: See [LLVM LTO](https://llvm.org/docs/LinkTimeOptimization.html).
 
-[^4]: See [Hyrum's Law])(https://www.hyrumslaw.com/).
+[^4]: See [Hyrum's Law](https://www.hyrumslaw.com/).
