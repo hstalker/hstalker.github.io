@@ -26,9 +26,8 @@ up on any and all guarantees as to the state of the thread from the other thread
 of execution's perspective.
 
 From such a description, you may ask the very valid question: Why would you ever
-want to detach then?... In response to that fine question, I will make a claim:
-You probably don't. Virtually every instance I see of direct detach usage in
-production systems is counter-productive [^2].
+want to detach then?... You probably don't. Virtually every instance I see of
+direct `detach()` usage in production systems is counter-productive [^2].
 
 
 ## Example Usage
@@ -84,69 +83,60 @@ potential real use-cases for `detach`.
 
 ### 1. Joining is Tricky
 
-The easiest one. Managing thread lifetimes in such a way you properly avoid
-unintentional blocking behavior is actually quite tricky in complex
-applications. Sometimes it's easier to just detach the thread and hope it
-terminates correctly. Join is similarly easy to use, but requires the developer
-to maintain the thread object somewhere in a proper fashion, and then offers the
-potential for the join call to block the joining thread if the thread being
-joined behaves improperly e.g. unintentionally locks, or enters some
-undefined/unexpected state. In other words, detaching works as a guard against
-poorly written code.
+This is the easiest one.
 
-Detach offers an easy way out. One can simply detach whatever thread they spawn,
-and, in a fire-and-forget approach to thread-management, carry on with their
-business. The spawning thread won't ever be blocked, and `std::terminate` will
-never be invoked as a result of forgetting to join somewhere.
+Managing thread lifetimes in such a way you properly avoid unintentional
+blocking behavior is actually quite tricky. Sometimes it's easier to just detach
+the thread and hope it terminates correctly. Join is similarly easy to use, but
+requires the developer to maintain the thread object, and then offers the
+potential for the join call to block the joining thread if the joinee thread
+behaves improperly (e.g. unintentionally locks, or enters some
+undefined/unexpected state).
+
+Detach offers an easy way out. Simply detach whatever thread you spawn, and - in
+a fire-and-forget approach to thread-management - carry on with your business.
+The spawning thread won't ever be blocked, and `std::terminate` will never be
+invoked as a result of forgetting to join somewhere.
 
 ```cpp
 std::thread{[]() { /* Do stuff */ }}.detach();
-// ... Carry on working
+// ... Carry on working, you thread-weaving monster :-)
 ```
-
-It should be a matter of no surprise that I feel little sympathy for this. As
-software developers, it's best to avoid doing the easy-but-wrong thing for
-longer than strictly necessary, and often some forethought can pay hefty
-dividends, especially when you are dealing with something as error-prone as
-concurrency.
-
 
 You might think this is an unlikely scenario, but I have seen this
 justification used before[^3].
 
+I feel little sympathy for this. It's probably best to avoid doing the
+easy-but-wrong thing more than strictly necessary, and often some forethought
+can pay hefty dividends, especially when you are dealing with something as
+error-prone as concurrency.
+
 
 ### 2. Short-lived, Terminating Operations
 
-This case has some overlap with case 1, but is much more reasonable.
-
 Sometimes the overhead of correct thread management simply isn't worth the
-effort, if you have extremely simple, well-defined operations that you known
-up-front have little chance to misbehave but need to be done asynchronously
-nonetheless.
+effort. This can be the case if you have extremely simple, well-defined
+operations that you know up-front have little chance to misbehave, but
+regardless need to be carried out with some degree of asynchronicity.
 
-The prerequisite here is that the operations have to be extremely small, and
-typically well-defined enough that they are unlikely to grow in scope much if at
-all[^4]. In cases where these don't hold, detaching is likely to end up being
-not fit for purpose.
+The prerequisite here is that the operations should be small, and typically
+well-defined enough that they are unlikely to grow in scope much if at all[^4].
+In cases where these constraints don't hold, detaching will end up not being fit
+for purpose.
 
-As with case 1, I think that whilst there is some value to this use-case, it's
-still more indicative of using sub-optimal abstractions for your purposes than a
-valid reason for detaching - effort of thread-management is better removed by
-abstraction than entirely foregoing control via using detach. It is a better
-justification than with case 1, but nonetheless not a great one.
+As with case 1, I think that whilst there is some value to this, it's still more
+indicative of using sub-optimal abstractions for your purposes than a valid
+reason for detaching. Thread management is better appropriately abstracted than
+entirely foregoing control via detachment.
 
 
 ### 3. Asynchronously Making Blocking/Unstable Calls
 
-This is by far the most reasonable use-case (dare I say the only justifiable
-use-case?), and can be considered yet another extension upon the prior
-justifications.
-
 When using poorly designed libraries from upstream, it can happen that the APIs
-you need are inherently blocking or unstable[^5]. In cases where this simply
+you need are synchronously blocking or unstable[^5]. In cases where this simply
 isn't sufficient for the asynchronicity and liveness profile of your downstream
-application, you require some method of making the call without blocking the
-calling thread of your application, and detach serves that purpose fairly well
+application, you may desire some method of making the call without blocking the
+calling thread of your application. Detach serves that purpose fairly well,
 whereas joining could indefinitely block the joining thread.
 
 An example of the kind of problem I describe above:
@@ -161,7 +151,7 @@ call_bad_c_library(); // Potentially blocking call
 foo();
 ```
 
-Detaching allows the developer to resolve this issue:
+Detaching allows the developer to work around this issue:
 ```cpp
 // Thread: Main
 std::thread stuckThread{[]() {
@@ -178,7 +168,8 @@ foo();
 
 // Handle stuck threads
 if (threadStillLive(retainedThreadId)) {
-  killThread(retainedThreadId); // Pseudocode for sake of argument - non-standard
+  // Pseudocode for sake of argument - non-standard
+  killThread(retainedThreadId);
 }
 ```
 
@@ -189,22 +180,20 @@ You might have noticed the interesting things about this second snippet:
  * You need some additional thread-safe method of detecting liveness of the
    thread.
 
-It should be clear that a full solution to this problem-case becomes quite
-complex, especially when we begin to take into account the possibility of
-multiple calls to the blocking API rather than just one. Spawning threads isn't
-exactly cheap either so if performance is necessary, even more complexity is
-needed.
+This is quite a complex use-case, especially when we begin to take into account
+the possibility of multiple calls to the blocking API rather than just one.
+Spawning threads isn't exactly cheap either so if performance is necessary, even
+more complexity is needed (e.g. maintaining a long-lived API thread or a
+thread-pool of sorts).
 
-Pragmatism dictates that this solution can make sense, because it is often the
-case that one is using pre-established libraries with pre-established blocking
-semantics, and we have little choice to work around what is given by upstream.
-However, therein lies the issue: This is something that - whilst a pragmatic
-stop-gap - is better resolved by maneuvering such that a non-blocking
-alternative of some variety is offered in the upstream API. This is little more
-than a hack working around an _API bug_. Sometimes fixing/replacing upstream is
-simply a more sensible long-term solution. As such, despite this being a
-justifiable usage of detach, it's still not really something worth
-_recommending_ in my eyes.
+This solution can make sense in aid of pragmatism. When you are using
+pre-established libraries with fixed semantics, you may have little choice to
+work around what is given by upstream. Therein lies the issue: This is something
+which is better resolved by maneuvering such that a non-blocking alternative of
+some variety is offered in the upstream API instead of attempting to work around
+an _API bug_. Sometimes fixing/replacing upstream is simply a more sensible
+long-term solution. Despite this being a justifiable usage of detach, it's still
+not really something worth _recommending_ in my eyes.
 
 
 ## Problems With Detach
@@ -218,18 +207,20 @@ detaching?
     given thread is actually doing from other threads is a pretty bad state to
     be in for writing correctly operating software_.
  2. Detaching throws away the simplest way to establish basic synchronization
-    between the spawning & spawned threads of execution. This is incredibly
-    useful, and vastly easier to manage than messing about with other shared
-    data and synchronization primitives. These may eventually be needed, but the
-    longer you can avoid needing them, the less likely you are to make mistakes.
- 3. Detach is usually a band-aid over some other issue, be that insufficient
-    higher-level async modeling, or a poor upstream API. Robust software is not
-    constructed by encouraging band-aids - not in the long-term anyway.
+    between the spawning & spawned threads of execution (i.e. `join`). This is
+    incredibly useful, and vastly easier to manage than messing about with other
+    shared data and synchronization primitives. These may eventually be needed,
+    but the longer you can avoid needing them, the less likely you are to make
+    mistakes.
+ 3. Detach is almost always a band-aid over some other issue, be that
+    insufficient higher-level async modeling, or a poor upstream API. Robust
+    software is not constructed by encouraging infinite band-aids be applied
+    atop infinite cuts - not in general anyway.
 
 
 ## What are the Alternatives?
 
-### Build RAII Abstractions
+### Build Abstractions
 
 This is exactly the kind of thing `std::jthread` was invented to solve. If
 calling join is too much effort, just use an RAII wrapper that does it for you.
@@ -237,28 +228,19 @@ calling join is too much effort, just use an RAII wrapper that does it for you.
 
 ### Don't Use Threads, Use Tasks/Futures/Coroutines
 
-Short-lived async operations are tasks. Short-lived async operations that
-provide a result are futures/promises. Both of these can be cleanly modeled via
-a coroutine language mechanism.
-
-Many use-cases for detach are hidden under higher-level abstractions already
-provided as part of C++. Directly managing threads is often overkill for these
-kinds of use-cases, and as such using detach is a poor fit. An added benefit of
-using better-fit models is that the problem being solved becomes easier to
-manage and grok.
+Short-lived async operations are effectively very basic tasks. Short-lived async
+operations that provide a result are futures/promises. Both of these are very
+well understood abstractions in the space & practice of computer science, some
+of which are even provided as part of the standard library.
 
 
 ### Model *Cancellable* Asynchronous Operations
 
-Many thread-based operations are in reality as cancellable ones. Indeed,
-cancellation is a critical building block to building robust concurrent
-software. Async operations can fail. Async operations can be interrupted. A
-thread is just a thread, and there is more to async than the primitive of
+Many thread-based operations are cancellable. Cancellation is a critical
+building block to building robust concurrent software. Async operations can
+fail. Async operations can often be interrupted. A thread is just a thread, and
+as we have already mentioned, there is more to async than the primitive of
 threads.
-
-If you build cancellable async abstractions, then the synchronization implied by
-`join` stops being a problem, because all async operations have a lifetime, are
-under control, and can be made to eventually terminate in a guarateed fashion.
 
 Interestingly enough, `std::jthread` and friends from C++20 were also designed
 to aid in this by the addition of `std::stop_token`; though I would argue it's
@@ -266,6 +248,10 @@ still insufficient as an abstraction due to the lack of ability to effectively
 handle stuck threads. Don't even get me started on killing threads that become
 stuck. You _don't_ want to be figuring out how different platforms' threading
 libraries pull that one off...[^6]
+
+Regardless, if you are able to model time-out join, thread cancellation and task
+cancellation, then it diminishes the need for detachment significantly in
+real-world code.
 
 
 ## Conclusions
@@ -284,8 +270,9 @@ source.
 
 [^2]: And also harmful. I have seen it cause pretty horrific issues in tear-down
     for applications, and result in ossifying software architectures that are
-    inherently broken, and very challenging to fix without dramatic
-    refactoring. Detach used out of laziness is not to be trifled with.
+    very hard to grok and subtly broken. These can be very challenging to fix
+    without dramatic refactoring. Detach used out of laziness is not to be
+    trifled with.
 
 [^3]: Thankfully it's rare.
 
