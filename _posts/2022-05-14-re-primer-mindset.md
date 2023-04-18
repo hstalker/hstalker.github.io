@@ -5,8 +5,8 @@ layout: post
 ---
 
 In this post I will be offering a 1000ft high-level overview of the mentality
-required to perform software reverse engineering. I will not be deliberately
-erring away from covering any specifics in technology or methods.
+required to perform software reverse engineering. I will be deliberately erring
+away from covering any specifics in technology or methods.
 
 
  1. [What is Reverse Engineering](#what-is-re)
