@@ -2,7 +2,9 @@ version: '3'
 
 services:
   jekyll:
-    image: docker.io/jekyll/jekyll:3.8
+    # Not technically "new" or the same as what's on github-pages, but close
+    # enough and new enough
+    image: docker.io/jekyll/jekyll:latest
     environment:
       - JEKYLL_ENV=development
       # The Jekyll image seems to require us to manually set the UID/GID
