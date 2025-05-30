@@ -1,4 +1,7 @@
-version: '3'
+version: '3.9'
+
+x-podman:
+  in_pod: false
 
 services:
   jekyll:
@@ -6,14 +9,15 @@ services:
     # enough and new enough
     image: docker.io/jekyll/jekyll:latest
     environment:
+      # Use a volume local gem store, as default user jekyll:jekyll can't write to /usr
+      - GEM_HOME=/srv/jekyll/.gem
       - JEKYLL_ENV=development
-      # The Jekyll image seems to require us to manually set the UID/GID
-      # for non-root containers
-      - JEKYLL_UID=1001
-      - JEKYLL_GID=1001
-    command: jekyll serve --livereload --drafts --force_polling --incremental
+    # Important to bind to 0.0.0.0 for rootless, or it won't expose to host correctly
+    command: bundle exec jekyll serve --livereload --drafts --force_polling --incremental --host 0.0.0.0 -P 4000
     ports:
       - 4000:4000
       - 35729:35729
     volumes:
       - .:/srv/jekyll
+    # Map inner jekyll:jekyll to host user
+    userns_mode: keep-id
