@@ -1,39 +1,156 @@
-title: "Sigbus Factor"
-description: "Sigbuses can kill projects almost as fast as real buses can"
-author: "Hector Stalker"
-email: "hector.g.stalker@gmail.com"
+# Where things are
+# source: .
+# destination: ./_site
+# collections_dir: .
+# plugins_dir: _plugins
+# layouts_dir: _layouts
+# data_dir: _data
+# includes_dir: _includes
+# sass:
+#   sass_dir: _sass
+# collections:
+#   posts:
+#     output: true
 
+# Handling reading
+# safe: false
+include:
+  - .htaccess
+  - _pages
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+  - .gitignore
+  - docker-compose.yml
+  - LICENSE
+  - README.md
+# keep_files: [".git", ".svn"]
+# encoding: "utf-8"
+# markdown_ext: "markdown,mkdown,mkdn,mkd,md"
+# strict_front_matter: false
+
+# Filtering content
+# show_drafts: null
+# limit_posts: 0
+# future: false
+# unpublished: false
+
+# Plugins
+# whitelist: []
 plugins:
+  - jekyll-default-layout
   - jekyll-feed
+  - jekyll-gist
+  - jekyll-github-metadata
+  - jekyll-optional-front-matter
+  - jekyll-paginate
+  - jekyll-relative-links
+  - jekyll-titles-from-headings
 
-theme: minima
+feed:
+  excerpt: true
+  posts_limits: 20
 
-# Prefer kramdown over GFM for footnotes.
+gist:
+  noscript: true
+
+optional_front_matter:
+  enabled: true
+
+titles_from_headings:
+  enabled: true
+  strip_title: false
+  collections: false
+
+relative_links:
+  enabled: true
+  collections: false
+
+# Conversion
 markdown: kramdown
+highlighter: rouge
+# lsi: false
+# excerpt_separator: "\n\n"
+# incremental: false
 
-# Social links
-github_username: hstalker
-linkedin_username: hstalker
-rss: RSS
+# Serving
+# detach: false
+# port: 4000
+# host: 127.0.0.1
+# baseurl: "" # does not include hostname
+# show_dir_listing: false
 
-# Show post excepts on the front page
-show_excerpts: true
+# Outputting
+# permalink: date
+# paginate_path: /page:num
+# timezone: null
 
+# quiet: false
+verbose: true
+# defaults: []
+
+liquid:
+#  error_mode: warn
+  strict_filters: true
+#  strict_variables: false
+
+# Markdown Processors
+kramdown:
+#   auto_ids: true
+#   entity_output: as_char
+#   toc_levels: [1, 2, 3, 4, 5, 6]
+#   smart_quotes: lsquo,rsquo,ldquo,rdquo
+#   input: GFM
+#   hard_wrap: false
+#   footnote_nr: 1
+  show_warnings: true
+
+# Theme settings
+theme: minima
 minima:
   date_format: "%Y-%m-%d"
+  skin: dark  # Minima 3.0
+  nav_pages: # Minima 3.0
+    - _pages/index.md
+    - _pages/about.md
+    - _pages/archive.md
+  social_links: # Minima 3.0
+    - title: Github
+      icon: github
+      url: "https://github.com/hstalker"
+    - title: LinkedIn
+      icon: linkedin
+      url: "https://www.linkedin.com/in/hstalker"
+  # Don't hide syndicated feed
+  hide_site_feed_link: false # Minima 3.0
+  # Show post excepts on the front page
+  show_excerpts: true # Minima 3.0
 
+author: # Minima 3.0
+  name: Hector Stalker
+  email: hector.g.stalker@gmail.com
+
+# Minima 2.0 (nav_pages)
 header_pages:
   - _pages/index.md
   - _pages/about.md
   - _pages/archive.md
 
-include:
-  - _pages
+# Minima 2.0 (author)
+author: "Hector Stalker"
+email: "hector.g.stalker@gmail.com"
 
-exclude:
-  - .gitignore
-  - docker-compose.yml
-  - Gemfile
-  - Gemfile.lock
-  - LICENSE
-  - README.md
+# Minima 2.0 (social_links)
+github_username: hstalker
+linkedin_username: hstalker
+
+show_excerpts: true # Minima 2.0
+
+# General global variables for templates & plugins
+title: "Sigbus Factor"
+description: "Sigbuses can kill projects almost as fast as real buses can"
